@@ -117,6 +117,7 @@ main { width: 100%; max-width: 1160px; margin: 0 auto; padding: 45px clamp(24px,
 .wide { width: 100%; }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
 .actions .primary { min-width: 180px; }
+#capture-form .actions { flex-direction: column; align-items: stretch; }
 .fields { display: grid; gap: 14px; }
 .field { display: grid; gap: 6px; min-width: 0; }
 .field > span, .field-label { font-weight: 750; font-size: .91rem; }
@@ -134,9 +135,6 @@ main { width: 100%; max-width: 1160px; margin: 0 auto; padding: 45px clamp(24px,
 .field input[readonly] { background: var(--canvas); }
 .field :disabled { opacity: .8; }
 .field-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.example-card { overflow: hidden; padding: 0; }
-.example-card > img { width: 100%; height: auto; aspect-ratio: 1.46; object-fit: cover; background: #ede2d9; }
-.example-content { display: grid; align-items: center; padding: 16px; }
 .notice { display: flex; align-items: flex-start; gap: 9px; padding: 13px 15px; background: var(--primary-soft); color: var(--primary-dark); border-radius: var(--field-radius); font-size: .9rem; }
 .notice .icon { margin-top: 1px; }
 .notice.error { color: var(--danger); background: var(--danger-soft); margin-bottom: 16px; }
@@ -250,7 +248,6 @@ main { width: 100%; max-width: 1160px; margin: 0 auto; padding: 45px clamp(24px,
   main { padding-inline: 25px; }
   .columns { gap: 15px; }
   .card { padding: 17px; }
-  .card.example-card { padding: 0; }
 }
 @media (max-width: 900px) {
   .layout { display: block; }
@@ -265,10 +262,6 @@ main { width: 100%; max-width: 1160px; margin: 0 auto; padding: 45px clamp(24px,
 @media (max-width: 600px) {
   .columns { grid-template-columns: 1fr; gap: 18px; }
   .capture-actions .button { flex-direction: column; padding: 6px 3px; min-height: 54px; font-size: .81rem; gap: 3px; }
-  .example-card { display: grid; grid-template-columns: 27% minmax(0, 1fr); }
-  .example-card > img { height: 100%; aspect-ratio: auto; object-position: 21% center; }
-  .example-content { padding: 13px; }
-  .example-content .button { width: fit-content; }
   .actions .primary { flex: 1; }
 }
 
@@ -281,6 +274,6 @@ main { width: 100%; max-width: 1160px; margin: 0 auto; padding: 45px clamp(24px,
 .catalog-grid h2, .catalog-grid p { overflow-wrap: anywhere; }
 .field textarea[readonly] { background: var(--canvas); }
 @media (min-width: 601px) {
-  .capture-columns aside, .review-context { grid-area: 1 / 2; }
+  .review-context { grid-area: 1 / 2; }
   #capture-form, #review-form { grid-area: 1 / 1; }
 }

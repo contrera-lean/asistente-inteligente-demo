@@ -46,7 +46,7 @@ let shareFiles = []
 function newDraft() {
   return {
     id: Array.from(crypto.getRandomValues(new Uint32Array(4)), part => part.toString(16).padStart(8, '0')).join(''),
-    branch: '', note: '', capture: null, example: false, images: [], items: [],
+    branch: 'centro', note: sample.note, capture: sample.image, example: true, images: [], items: [],
   }
 }
 
@@ -127,15 +127,7 @@ function capturePage() {
     ${heading('Nuevo ingreso')}
     ${steps()}
     ${error ? notice(error, true) : ''}
-    <div class="columns capture-columns">
-      <aside aria-label="Ingreso de ejemplo">
-        <section class="card example-card">
-          <img src="${sample.image}" alt="Remera rosa y pantalón beige sobre una tela clara" width="1050" height="700">
-          <div class="example-content">
-            <button type="button" class="button soft wide" data-action="example" ${busy ? 'disabled' : ''}>${icon('wand')} Usar ejemplo</button>
-          </div>
-        </section>
-      </aside>
+    <div class="capture-columns">
       <form id="capture-form" class="stack">
         <section class="card">
           ${cardTitle('camera', 'Foto o video')}
@@ -162,7 +154,10 @@ function capturePage() {
             </label>
           </div>
         </section>
-        <div class="actions"><button class="button primary" type="submit" ${busy ? 'disabled' : ''}>${busy ? 'Preparando la captura…' : 'Continuar'} ${icon('arrow')}</button></div>
+        <div class="actions">
+          <button class="button primary" type="submit" ${busy ? 'disabled' : ''}>${busy ? 'Preparando la captura…' : 'Continuar'} ${icon('arrow')}</button>
+          <button type="button" class="button soft" data-action="example" ${busy ? 'disabled' : ''}>${icon('wand')} Usar ejemplo</button>
+        </div>
       </form>
     </div>`
 }
