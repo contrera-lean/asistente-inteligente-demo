@@ -1,8 +1,9 @@
-const CACHE = 'bbb-demo-v8'
+const CACHE = 'bbb-demo-v20'
 const SHELL = [
   './', './index.html', './styles.css', './app.js', './inventory.js', './media.js',
   './manifest.webmanifest', './assets/dm-sans.woff2', './assets/icon-192.png',
   './assets/icon-512.png', './assets/ejemplo.webp', './assets/remera.webp', './assets/pantalon.webp',
+  './assets/remera-catalogo.webp', './assets/pantalon-catalogo.webp',
 ]
 
 self.addEventListener('install', event => {

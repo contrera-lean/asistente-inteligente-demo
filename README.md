@@ -32,4 +32,6 @@ El ejemplo trae sugerencias simuladas. Con una foto o un video propio, se arma u
 
 La foto se generó con imagegen y se guardó como [ejemplo.webp](assets/ejemplo.webp). [remera.webp](assets/remera.webp) y [pantalon.webp](assets/pantalon.webp) son recortes de esa imagen.
 
+Las fotos mejoradas, [remera-catalogo.webp](assets/remera-catalogo.webp) y [pantalon-catalogo.webp](assets/pantalon-catalogo.webp), se editaron con imagegen a partir de esos recortes. El pedido fue alisar cada prenda y cambiar el fondo a blanco, conservando el encuadre, el color y las costuras.
+
 > Product-mockup, photorealistic editorial retail photography for an Argentine clothing shop app, wide 3:2. Overhead flat lay, one warm muted rose short sleeve crewneck cotton tshirt fully visible on LEFT half, one folded khaki beige casual chino pants fully visible on RIGHT half, over pale warm off-white linen. Each garment wholly within its own half and center separated by visible space, so each half can be cropped independently. Soft directional daylight with delicate fabric shadows. Minimal simple clean mercadería catalogue sample. No writing, no labels, no other objects.

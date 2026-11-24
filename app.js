@@ -8,7 +8,6 @@ const icons = {
   camera: '<path d="M4 7h4l2-3h4l2 3h4a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="3"/>',
   image: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
   video: '<rect x="2" y="5" width="14" height="14" rx="3"/><path d="m16 10 6-3v10l-6-3"/>',
-  note: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Zm0 0v6h6M8 13h8m-8 4h6"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/>',
   arrow: '<path d="M4 12h15m-6-6 6 6-6 6"/>',
   check: '<path d="m5 12 4 4L19 6"/>',
@@ -18,6 +17,7 @@ const icons = {
   share: '<path d="M12 15V3m-4 4 4-4 4 4M7 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2"/>',
   download: '<path d="M12 3v12m-4-4 4 4 4-4M4 16v4h16v-4"/>',
   compare: '<path d="m9 8-4 4 4 4m6-8 4 4-4 4"/>',
+  chevron: '<path d="m6 9 6 6 6-6"/>',
 }
 
 const icon = name => `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]}</svg>`
@@ -54,7 +54,7 @@ function blankItem(image = draft.images[0]) {
   return {
     code: '', name: '', description: '', retail: '', wholesale: '', existing: '',
     imageChoice: image === draft.images[0] ? 'original' : 'enhanced', image,
-    enhanced: draft.images[1], variants: [{ size: '', quantity: '' }],
+    original: draft.images[0], enhanced: draft.images[1], variants: [{ size: '', quantity: '' }],
   }
 }
 
@@ -70,12 +70,13 @@ function sampleItems() {
   return [
     {
       ...sample.shirt, existing: sample.shirt.code, imageChoice: 'enhanced',
-      enhanced: sample.shirt.image, variants: [{ size: 'M', quantity: '12' }],
+      original: './assets/remera.webp', enhanced: sample.shirt.image, variants: [{ size: 'M', quantity: '12' }],
     },
     {
       ...sample.pants, code: availableCode(sample.pants.code),
       existing: catalog.some(product => product.code === sample.pants.code) ? sample.pants.code : '',
-      imageChoice: 'enhanced', enhanced: sample.pants.image, variants: [{ size: '40', quantity: '6' }],
+      imageChoice: 'enhanced', original: './assets/pantalon.webp',
+      enhanced: sample.pants.image, variants: [{ size: '40', quantity: '6' }],
     },
   ]
 }
@@ -88,7 +89,7 @@ function source(image) {
 }
 
 function heading(title, subtitle) {
-  return `<header class="page-header"><h1 tabindex="-1">${title}</h1><p>${subtitle}</p></header>`
+  return `<header class="page-header"><h1 tabindex="-1">${title}</h1>${subtitle ? `<p>${subtitle}</p>` : ''}</header>`
 }
 
 function cardTitle(name, title) {
@@ -96,12 +97,16 @@ function cardTitle(name, title) {
 }
 
 function steps() {
-  return `<ol class="steps" aria-label="Progreso del ingreso">${['Captura', 'Revisión', 'Confirmación'].map((label, index) => {
-    const position = index + 1
-    const current = position === stage ? 'aria-current="step"' : ''
-    const done = position < stage
-    return `<li ${current} class="${done ? 'done' : ''}"><span class="step-number">${done ? icon('check') : position}</span>${label}</li>`
-  }).join('')}</ol>`
+  const labels = ['Captura', 'Revisión', 'Confirmación']
+  return `<div class="steps">
+    <p class="steps-caption">Paso ${stage} de ${labels.length} · <strong>${labels[stage - 1]}</strong></p>
+    <ol class="steps-bars" aria-label="Progreso del ingreso">${labels.map((label, index) => {
+      const position = index + 1
+      const state = position < stage ? 'done' : position === stage ? 'current' : ''
+      const current = position === stage ? ' aria-current="step"' : ''
+      return `<li class="${state}"${current}><span class="sr-only">${label}${position < stage ? ' (completado)' : ''}</span></li>`
+    }).join('')}</ol>
+  </div>`
 }
 
 function notice(message, isError = false) {
@@ -119,7 +124,7 @@ function capturePage() {
     ? `<video src="${source(capture)}" controls playsinline preload="metadata"></video>`
     : `<img src="${source(capture)}" alt="Captura de la mercadería">`
   return `
-    ${heading('Ingreso de mercadería', 'Cargá las prendas que llegaron y actualizá el stock de tu sucursal.')}
+    ${heading('Nuevo ingreso')}
     ${steps()}
     ${error ? notice(error, true) : ''}
     <div class="columns capture-columns">
@@ -127,8 +132,6 @@ function capturePage() {
         <section class="card example-card">
           <img src="${sample.image}" alt="Remera rosa y pantalón beige sobre una tela clara" width="1050" height="700">
           <div class="example-content">
-            <h2>Probá con un ejemplo</h2>
-            <p class="muted small">Usá una foto y una descripción de muestra para recorrer un ingreso completo.</p>
             <button type="button" class="button soft wide" data-action="example" ${busy ? 'disabled' : ''}>${icon('wand')} Usar ejemplo</button>
           </div>
         </section>
@@ -140,8 +143,7 @@ function capturePage() {
             ? `<div class="capture-preview">${media}</div>`
             : `<div class="drop-zone" id="drop-zone">
                 <span class="title-icon">${icon('image')}</span>
-                <strong>Agregá una foto o un video</strong>
-                <p class="small muted">Mostrá las prendas que llegaron.</p>
+                <span>Sin captura</span>
               </div>`}
           <div class="capture-actions">
             <button type="button" class="button" data-action="camera" ${busy ? 'disabled' : ''}>${icon('camera')} Tomar foto</button>
@@ -153,13 +155,11 @@ function capturePage() {
           <input type="file" id="gallery" accept="image/*,video/*" hidden>
         </section>
         <section class="card">
-          ${cardTitle('note', 'Datos del ingreso')}
           <div class="fields">
             <label class="field"><span>Sucursal</span><select data-draft="branch" required>${branchOptions(draft.branch, true)}</select></label>
             <label class="field"><span>Descripción <small class="muted">(opcional)</small></span>
-              <textarea data-draft="note" maxlength="3000" aria-describedby="dictation" placeholder="Ej. Remeras rosas, 12 talle M, $12.500 minorista…">${escapeHtml(draft.note)}</textarea>
+              <textarea data-draft="note" maxlength="3000" placeholder="Ej. 12 remeras rosas talle M">${escapeHtml(draft.note)}</textarea>
             </label>
-            <p id="dictation" class="small muted">Podés escribir o dictar con el micrófono del teclado.</p>
           </div>
         </section>
         <div class="actions"><button class="button primary" type="submit" ${busy ? 'disabled' : ''}>${busy ? 'Preparando la captura…' : 'Continuar'} ${icon('arrow')}</button></div>
@@ -191,7 +191,7 @@ function photoComparison(item, index) {
   return `<div class="product-photo">
     <div class="photo-comparison" style="--split: ${split}%">
       <img src="${source(item.enhanced)}" alt="">
-      <img class="comparison-original" src="${source(draft.images[0])}" alt="">
+      <img class="comparison-original" src="${source(item.original)}" alt="">
       <span class="comparison-divider" aria-hidden="true"></span>
       <span class="comparison-handle" aria-hidden="true">${icon('compare')}</span>
       <div class="comparison-labels" aria-hidden="true"><span>Original</span><span>Mejorada</span></div>
@@ -200,7 +200,7 @@ function photoComparison(item, index) {
         aria-label="Comparar imágenes de la ${garment}" aria-valuetext="${comparisonValue(split)}">
     </div>
     <fieldset class="photo-choice">
-      <legend>Imagen para guardar</legend>
+      <legend class="sr-only">Imagen para guardar</legend>
       ${[['original', 'Original'], ['enhanced', 'Mejorada']].map(([choice, label]) => `<label>
         <input type="radio" name="photo-${index}" value="${choice}" data-item="${index}" data-key="imageChoice"
           ${item.imageChoice === choice ? 'checked' : ''}>
@@ -210,57 +210,82 @@ function photoComparison(item, index) {
   </div>`
 }
 
+function reviewTitle(name, index) {
+  return [`Prenda ${Number(index) + 1}`, name.trim()].filter(Boolean).join(' · ')
+}
+
+const maxQuantity = 999_999_999_999_999
+
+function quantityField(quantity, index, row) {
+  const labelId = `quantity-label-${index}-${row}`
+  return `<div class="field">
+    <span id="${labelId}">Unidades</span>
+    <div class="quantity-stepper" role="group" aria-labelledby="${labelId}">
+      <button type="button" data-action="decrease-quantity" aria-label="Restar una unidad" aria-disabled="${Number(quantity) <= 1}">−</button>
+      <input data-item="${index}" data-row="${row}" data-key="quantity" value="${escapeHtml(quantity)}"
+        aria-labelledby="${labelId}" required inputmode="numeric" pattern="[0-9]+" maxlength="15">
+      <button type="button" data-action="increase-quantity" aria-label="Sumar una unidad" aria-disabled="${Number(quantity) >= maxQuantity}">+</button>
+    </div>
+  </div>`
+}
+
 function reviewItem(item, index) {
   const product = catalog.find(entry => entry.code === item.existing)
   const info = product ?? item
   const readonly = product ? 'readonly' : ''
   return `<section class="card stack" data-card="${index}">
     <div class="review-heading">
-      <div><h2>Prenda ${index + 1}</h2></div>
+      <h2><button class="button review-toggle" type="button" data-action="toggle-item" data-index="${index}"
+        aria-controls="review-item-${index}" aria-expanded="${!item.collapsed}">
+        ${icon('chevron')} <span>${escapeHtml(reviewTitle(info.name, index))}</span>
+      </button></h2>
       <button type="button" class="button quiet danger square" data-action="remove-item" data-index="${index}" aria-label="Quitar prenda ${index + 1}">${icon('trash')}</button>
     </div>
-    ${photoComparison(item, index)}
-    <div class="fields">
-      <label class="field"><span>Producto</span><select data-item="${index}" data-key="existing">
-        <option value="">Producto nuevo</option>
-        ${catalog.map(entry => `<option value="${escapeHtml(entry.code)}" ${entry.code === item.existing ? 'selected' : ''}>Reposición · ${escapeHtml(entry.name)} (${escapeHtml(entry.code)})</option>`).join('')}
-      </select></label>
-      <div class="field-pair">
-        ${itemField(index, 'name', 'Nombre', info.name, `required maxlength="100" ${readonly}`)}
-        ${itemField(index, 'code', 'Código', info.code, `required maxlength="40" ${readonly}`)}
+    <div id="review-item-${index}" class="stack review-item-fields" ${item.collapsed ? 'hidden' : ''}>
+      ${photoComparison(item, index)}
+      <div class="fields">
+        <label class="field"><span>Producto</span><select data-item="${index}" data-key="existing">
+          <option value="">Producto nuevo</option>
+          ${catalog.map(entry => `<option value="${escapeHtml(entry.code)}" ${entry.code === item.existing ? 'selected' : ''}>Reposición · ${escapeHtml(entry.name)} (${escapeHtml(entry.code)})</option>`).join('')}
+        </select></label>
+        <div class="field-pair">
+          ${itemField(index, 'name', 'Nombre', info.name, `required maxlength="100" ${readonly}`)}
+          ${itemField(index, 'code', 'Código', info.code, `required maxlength="40" ${readonly}`)}
+        </div>
+        <label class="field"><span>Descripción del catálogo</span><textarea data-item="${index}" data-key="description" required maxlength="500" ${readonly}>${escapeHtml(info.description)}</textarea></label>
+        <div class="field-pair">
+          ${itemField(index, 'retail', 'Minorista ($)', priceInput(info.retail), `required inputmode="decimal" maxlength="18" ${readonly}`)}
+          ${itemField(index, 'wholesale', 'Mayorista ($)', priceInput(info.wholesale), `required inputmode="decimal" maxlength="18" ${readonly}`)}
+        </div>
       </div>
-      <label class="field"><span>Descripción del catálogo</span><textarea data-item="${index}" data-key="description" required maxlength="500" ${readonly}>${escapeHtml(info.description)}</textarea></label>
-      <div class="field-pair">
-        ${itemField(index, 'retail', 'Minorista ($)', priceInput(info.retail), `required inputmode="decimal" maxlength="18" ${readonly}`)}
-        ${itemField(index, 'wholesale', 'Mayorista ($)', priceInput(info.wholesale), `required inputmode="decimal" maxlength="18" ${readonly}`)}
+      <div class="variant-section">
+        <h3>Talles y cantidades</h3>
+        <div class="variant-list">
+          ${item.variants.map((variant, row) => `<div class="variant-row">
+            <label class="field"><span>Talle</span>
+              <input data-item="${index}" data-row="${row}" data-key="size" value="${escapeHtml(variant.size)}" required
+                placeholder="Ej. M o Único" maxlength="16">
+            </label>
+            ${quantityField(variant.quantity, index, row)}
+            <button type="button" class="button quiet danger square" data-action="remove-variant" data-index="${index}" data-row="${row}" aria-label="Quitar talle ${row + 1} de la prenda ${index + 1}">${icon('trash')}</button>
+          </div>`).join('')}
+        </div>
+        <div><button type="button" class="button soft" data-action="add-variant" data-index="${index}">${icon('plus')} Agregar talle</button></div>
       </div>
-    </div>
-    <div class="variant-section">
-      <h3>Talles y cantidades</h3>
-      <div class="variant-list">
-        ${item.variants.map((variant, row) => `<div class="variant-row">
-          ${['size', 'quantity'].map((key, column) => `<label class="field"><span>${column === 0 ? 'Talle' : 'Unidades'}</span>
-            <input data-item="${index}" data-row="${row}" data-key="${key}" value="${escapeHtml(variant[key])}" required
-              ${column === 0 ? 'placeholder="Ej. M o Único" maxlength="16"' : 'inputmode="numeric" pattern="[0-9]+" maxlength="15" placeholder="Ej. 12"'}>
-          </label>`).join('')}
-          <button type="button" class="button quiet danger square" data-action="remove-variant" data-index="${index}" data-row="${row}" aria-label="Quitar talle ${row + 1} de la prenda ${index + 1}">${icon('trash')}</button>
-        </div>`).join('')}
-      </div>
-      <div><button type="button" class="button soft" data-action="add-variant" data-index="${index}">${icon('plus')} Agregar talle</button></div>
     </div>
   </section>`
 }
 
 function reviewPage() {
+  const note = draft.note.trim()
   return `
-    ${heading('Revisá las prendas', `${branchName(draft.branch)} · Completá los datos antes de sumar el stock.`)}
+    ${heading('Revisá las prendas', branchName(draft.branch))}
     ${steps()}
     ${error ? notice(error, true) : ''}
     <div class="columns review-columns">
-      <aside class="stack review-context" aria-label="Contexto del ingreso">
-        ${notice(draft.example ? 'Las sugerencias de este ejemplo están simuladas. Podés editar las fichas antes de confirmar.' : 'Completá una ficha por prenda. Podés usar la captura o una versión con ajustes de luz y contraste.')}
-        ${draft.note.trim() ? `<details class="card"><summary>Nota de ingreso</summary><p class="muted note-text">${escapeHtml(draft.note)}</p></details>` : ''}
-      </aside>
+      ${draft.example || note ? `<aside class="stack review-context" aria-label="Contexto del ingreso">
+        ${note ? `<details class="card"><summary>Descripción</summary><p class="muted note-text">${escapeHtml(draft.note)}</p></details>` : ''}
+      </aside>` : ''}
       <form id="review-form" class="stack">
         <fieldset class="review-fields stack" ${busy ? 'disabled' : ''}>
           ${draft.items.map(reviewItem).join('')}
@@ -277,14 +302,13 @@ function reviewPage() {
 function shareOptions() {
   return `<dialog id="share-options" class="card share-options" aria-labelledby="share-options-title">
     <div class="stack">
-      <h2 id="share-options-title">Compartir la novedad</h2>
-      <a class="button primary" id="share-whatsapp" target="_blank" rel="noopener noreferrer">${icon('share')} Abrir WhatsApp con el texto</a>
+      <h2 id="share-options-title">Compartir</h2>
+      <a class="button primary" id="share-whatsapp" target="_blank" rel="noopener noreferrer">${icon('share')} Enviar texto por WhatsApp</a>
       <div class="stack">
-        <p class="muted small">Para Instagram, Facebook o TikTok, descargá las fotos y pegá el texto en la publicación.</p>
         <button type="button" class="button" data-action="copy">${icon('copy')} Copiar texto</button>
         <p class="small muted" role="status"></p>
         ${receipt.products.map((product, index) => `<a class="button" href="${source(product.image)}" download="prenda-${index + 1}.${photoExtension(product.image)}">
-          ${icon('download')} Descargar foto de ${escapeHtml(product.name)}
+          ${icon('download')} Descargar ${escapeHtml(product.name)}
         </a>`).join('')}
       </div>
       <form method="dialog"><button class="button quiet wide" type="submit">Cerrar</button></form>
@@ -293,16 +317,12 @@ function shareOptions() {
 }
 
 function successPage() {
-  const count = receipt.products.length
   return `
     <header class="page-header">
       <div class="success-heading"><span class="title-icon">${icon('check')}</span><h1 tabindex="-1">Ingreso confirmado</h1></div>
-      <p>Las unidades quedaron sumadas al stock de ${branchName(receipt.branch)}.</p>
     </header>
-    ${steps()}
     <div class="columns">
       <section class="card stack">
-        ${cardTitle('share', 'Compartí la novedad')}
         <div class="share-preview">${receipt.products.map(product => `<img src="${source(product.image)}" alt="${escapeHtml(product.name)}">`).join('')}</div>
         <label class="field"><span>Texto para compartir</span><textarea id="share-text" rows="5">${escapeHtml(shareText)}</textarea></label>
         <div class="actions share-actions">
@@ -312,22 +332,14 @@ function successPage() {
         ${shareOptions()}
       </section>
       <aside class="stack">
-        <section class="card">
-          ${cardTitle('boxes', 'Resumen del ingreso')}
-          <div class="summary">
-            <div><span>Sucursal</span><strong>${branchName(receipt.branch)}</strong></div>
-            <div><span>Productos</span><strong>${count}</strong></div>
-            <div><span>Unidades</span><strong>${receipt.units}</strong></div>
-          </div>
-        </section>
-        <button class="button soft" type="button" data-action="reset">${icon('add')} Cargar otro ingreso</button>
+        <button class="button soft" type="button" data-action="reset">${icon('add')} Nuevo ingreso</button>
       </aside>
     </div>`
 }
 
 function catalogPage() {
   return `
-    ${heading('Catálogo', 'Consultá las prendas y el stock de cada sucursal.')}
+    ${heading('Catálogo')}
     ${catalogError ? notice(catalogError, true) : ''}
     <label class="field catalog-branch"><span>Ver stock de</span><select id="catalog-branch">${branchOptions(catalogBranch)}</select></label>
     <div class="catalog-grid">
@@ -340,7 +352,7 @@ function catalogPage() {
           <p class="small">Minorista <strong>${formatPrice(product.retail)}</strong><br>Mayorista <strong>${formatPrice(product.wholesale)}</strong></p>
           <div class="stock-list">
             ${lines.length ? lines.map(line => `<div><span>Talle ${escapeHtml(line.size)}</span><strong>${line.quantity} u.</strong></div>`).join('')
-              : '<p class="small muted">Sin unidades en esta sucursal.</p>'}
+              : '<p class="small muted">Sin stock</p>'}
           </div>
         </article>`
       }).join('')}
@@ -435,6 +447,13 @@ function updateField(event) {
   }
   const target = row === undefined ? item : item.variants[row]
   target[key] = field.value
+  if (key === 'quantity') {
+    field.previousElementSibling.setAttribute('aria-disabled', String(Number(field.value) <= 1))
+    field.nextElementSibling.setAttribute('aria-disabled', String(Number(field.value) >= maxQuantity))
+  }
+  if (key === 'name') {
+    field.closest('[data-card]').querySelector('.review-toggle span').textContent = reviewTitle(item.name, index)
+  }
 }
 
 function changeField(event) {
@@ -450,7 +469,7 @@ function changeField(event) {
   const item = draft.items[index]
   item[key] = field.value
   if (key === 'imageChoice') {
-    item.image = field.value === 'enhanced' ? item.enhanced : draft.images[0]
+    item.image = field.value === 'enhanced' ? item.enhanced : item.original
     return
   }
   render()
@@ -587,8 +606,26 @@ function resetIngreso() {
   error = ''
 }
 
+function setReviewItemOpen(button, open) {
+  draft.items[button.dataset.index].collapsed = !open
+  button.setAttribute('aria-expanded', String(open))
+  document.getElementById(button.getAttribute('aria-controls')).hidden = !open
+}
+
+function stepQuantity(button, delta) {
+  if (button.getAttribute('aria-disabled') === 'true') return
+  const field = button.parentElement.querySelector('input')
+  const current = /^[0-9]+$/.test(field.value) ? Number(field.value) : 0
+  field.value = String(Math.max(1, Math.min(maxQuantity, current + delta)))
+  field.dispatchEvent(new Event('input', { bubbles: true }))
+}
+
 main.addEventListener('input', updateField)
 main.addEventListener('change', changeField)
+main.addEventListener('invalid', event => {
+  const fields = event.target.closest('.review-item-fields[hidden]')
+  if (fields) setReviewItemOpen(fields.closest('[data-card]').querySelector('.review-toggle'), true)
+}, true)
 main.addEventListener('submit', event => {
   if (event.target.method === 'dialog') return
   event.preventDefault()
@@ -612,6 +649,9 @@ main.addEventListener('click', event => {
     resetIngreso()
     showPage()
   }
+  if (action === 'toggle-item') setReviewItemOpen(button, button.getAttribute('aria-expanded') === 'false')
+  if (action === 'decrease-quantity') stepQuantity(button, -1)
+  if (action === 'increase-quantity') stepQuantity(button, 1)
   if (['add-item', 'remove-item', 'add-variant', 'remove-variant'].includes(action)) editItems(action, index, row)
   if (action === 'copy') void copyText()
   if (action === 'share') void sharePromotion()

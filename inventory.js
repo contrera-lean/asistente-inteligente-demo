@@ -11,11 +11,11 @@ export const sample = {
   note: 'Remera rosa, 12 talle M, minorista $12.500 y mayorista $9.500. Pantalón beige, 6 talle 40, minorista $24.000 y mayorista $18.000.',
   shirt: {
     code: 'REM-001', name: 'Remera rosa', description: 'Remera de algodón rosa, de manga corta.',
-    retail: 12500, wholesale: 9500, image: './assets/remera.webp',
+    retail: 12500, wholesale: 9500, image: './assets/remera-catalogo.webp',
   },
   pants: {
     code: 'PAN-001', name: 'Pantalón beige', description: 'Pantalón de gabardina beige.',
-    retail: 24000, wholesale: 18000, image: './assets/pantalon.webp',
+    retail: 24000, wholesale: 18000, image: './assets/pantalon-catalogo.webp',
   },
 }
 
