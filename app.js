@@ -199,14 +199,6 @@ function photoComparison(item, index) {
         data-item="${index}" data-key="comparisonSplit"
         aria-label="Comparar imágenes de la ${garment}" aria-valuetext="${comparisonValue(split)}">
     </div>
-    <fieldset class="photo-choice">
-      <legend class="sr-only">Imagen para guardar</legend>
-      ${[['original', 'Original'], ['enhanced', 'Mejorada']].map(([choice, label]) => `<label>
-        <input type="radio" name="photo-${index}" value="${choice}" data-item="${index}" data-key="imageChoice"
-          ${item.imageChoice === choice ? 'checked' : ''}>
-        ${label}
-      </label>`).join('')}
-    </fieldset>
   </div>`
 }
 
@@ -259,7 +251,6 @@ function reviewItem(item, index) {
         </div>
       </div>
       <div class="variant-section">
-        <h3>Talles y cantidades</h3>
         <div class="variant-list">
           ${item.variants.map((variant, row) => `<div class="variant-row">
             <label class="field"><span>Talle</span>
