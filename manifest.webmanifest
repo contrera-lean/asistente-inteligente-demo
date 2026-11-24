@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Bueno Bonito Barato",
+  "short_name": "Bueno Bonito Barato",
+  "description": "Ingresá mercadería al catálogo de Bueno Bonito Barato.",
+  "lang": "es-AR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f5fb",
+  "theme_color": "#f6f5fb",
+  "icons": [
+    { "src": "./assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./assets/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

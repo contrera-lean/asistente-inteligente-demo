@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f5fb">
+  <meta name="description" content="Ingresá mercadería al catálogo de Bueno Bonito Barato.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icon-192.png">
+  <link rel="apple-touch-icon" href="./assets/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Bueno Bonito Barato · Ingreso de mercadería</title>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="#ingreso">
+        <img src="./assets/icon-192.png" width="42" height="42" alt="">
+        <span>Bueno Bonito Barato</span>
+      </a>
+      <nav class="navigation" aria-label="Navegación principal">
+        <a data-nav="ingreso" href="#ingreso"></a>
+        <a data-nav="catalogo" href="#catalogo"></a>
+      </nav>
+      <div class="sidebar-footer"><span class="demo-dot"></span> demo</div>
+    </aside>
+    <main id="main"></main>
+  </div>
+  <p id="notification" class="toast" role="status" hidden></p>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
