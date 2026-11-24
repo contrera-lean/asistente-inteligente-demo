@@ -1,4 +1,4 @@
-const CACHE = 'bbb-demo-v21'
+const CACHE = 'bbb-demo-v22'
 const SHELL = [
   './', './index.html', './styles.css', './app.js', './inventory.js', './media.js',
   './manifest.webmanifest', './assets/dm-sans.woff2', './assets/icon-192.png',
